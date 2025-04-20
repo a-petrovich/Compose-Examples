@@ -1,0 +1,42 @@
+services:
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      # These ports are in format <host-port>:<container-port>
+      #- '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+      # Add any other Stream port you want to expose
+      # - '21:21' # FTP
+    environment:
+      - PUID=${MY_UID}
+      - PGID=${MY_GUID}
+      - DB_MYSQL_HOST=${MARIA_DB_HOST}
+      - DB_MYSQL_PORT=${MARIA_DB_PORT}
+      - DB_MYSQL_USER=${DB_MYSQL_USER}
+      - DB_MYSQL_PASSWORD=${DB_MYSQL_PASSWORD}
+      - DB_MYSQL_NAME=${DB_MYSQL_NAME}
+      - DISABLE_IPV6=true
+      - DEBUG=0
+      - TZ=${MY_TZ}
+    networks:
+      #- other_net
+      - proxy
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+      - ./snippets:/snippets:ro          ## Authelia snippets
+    healthcheck:
+      test: ["CMD", "/bin/check-health"]
+      interval: 10s
+      timeout: 3s
+
+networks:
+  proxy:
+    name: CustomBridge
+    external: true
+  #other_net:
+  #  name: other_net
+  #  external: true

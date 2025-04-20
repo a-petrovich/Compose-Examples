@@ -1,0 +1,18 @@
+services:
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall
+    environment:
+      - PUID=${MY_UID}
+      - PGID=${MY_GUID}
+      - TZ=${MY_TZ}
+    volumes:
+      - ./config:/config
+    #ports:
+    #  - 80:80
+    #  - 443:443
+    restart: unless-stopped
+networks:
+  default:
+    name: ${MY_NET}
+    external: true

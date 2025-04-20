@@ -1,0 +1,60 @@
+{
+	servers {
+		trusted_proxies static 192.168.0.0/24 172.20.0.0/24
+		client_ip_headers CF-Connecting-IP X-Forwarded-For
+	}
+	email {env.MY_EMAIL}
+	cert_issuer acme
+	admin :2019
+	metrics
+	#admin off
+	#acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+	log http.log.access {
+		format json
+		output file /var/log/caddy/caddy_access.log
+		level WARN
+	}
+
+	log default {
+		exclude http.log.access
+		format json
+		output file /var/log/caddy/caddy.log
+		level WARN
+	}
+}
+
+import snippets.caddy
+
+{env.MY_DOMAIN} {
+	import tls_config
+
+	@skipip client_ip private_ranges
+	
+	log
+	log_skip @skipip
+
+	import security
+
+	#import local_only
+
+	root * /data/site/
+	file_server
+}
+
+*.{env.MY_DOMAIN} {
+	import tls_config
+
+	@skipip client_ip private_ranges
+	
+	log
+	log_skip @skipip
+
+	import local.caddy
+
+	import external.caddy
+
+	# Fallback for otherwise unhandled domains
+	handle {
+		respond 404
+	}
+}

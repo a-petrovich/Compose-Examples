@@ -1,0 +1,29 @@
+services:
+  hlds:
+    # 📣 Adjust the image value here with the desired game you want the server to use. Options include:
+    # 🔧 jives/hlds:valve (Half-Life Deathmatch)
+    # 🔧 jives/hlds:cstrike (Counter-Strike)
+    # 🔧 jives/hlds:czero (Counter-Strike: Condition Zero)
+    # 🔧 jives/hlds:dmc (Deathmatch Classic)
+    # 🔧 jives/hlds:gearbox (Half-Life Opposing Force)
+    # 🔧 jives/hlds:ricochet (Ricochet)
+    # 🔧 jives/hlds:dod (Day of Defeat)
+    # 🔧 jives/hlds:tfc (Team Fortress Classic)
+    # 🔧 jives/hlds:valve-legacy (Half-Life Deathmatch) (Pre 25th Anniversary Edition)
+    # 🔧 jives/hlds:cstrike-legacy (Counter-Strike) (Pre 25th Anniversary Edition)
+    # 🔧 jives/hlds:czero-legacy (Counter-Strike: Condition Zero) (Pre 25th Anniversary Edition)
+    image: jives/hlds:cstrike
+    #user: ${MY_UID}:${MY_GUID}
+    volumes:
+      - "./cs16/configs:/temp/config"
+      - "./cs16/mods:/temp/mods"
+      - "./cs16/logs:/temp/logs"
+    ports:
+      - "27015:27015/udp"
+      - "27015:27015"
+      - "27020:27020"
+      - "26900:2690/udp"
+    environment:
+      - GAME=${GAME}
+    # 📣 Modify your server startup commands here.
+    command: +log on +rcon_password "${PASS}" +maxplayers 12 +map de_dust2

@@ -1,0 +1,110 @@
+(tls_config) {
+	tls {
+		dns cloudflare {env.CF_API_TOKEN}
+		resolvers 1.1.1.1
+	}
+}
+
+(local_only) {
+	@external {
+		not remote_ip 192.168.0.0/16 172.20.0.0/24 10.0.0.0/8 127.0.0.1/8
+	}
+	respond @external 403
+}
+
+(security) {
+	header {
+		Strict-Transport-Security max-age=31536000;
+		# Enable cross-site filter (XSS) and tell browser to block detected attacks
+		X-XSS-local_onlyion "1; mode=block"
+		# Disallow the site to be rendered within a frame (clickjacking local_onlyion)
+		#X-Frame-Options "sameorigin"
+		# Prevent search engines from indexing (optional)
+		X-Robots-Tag "noindex,nofollow"
+		# Server name removing
+		-Server
+	}
+}
+
+(authelia) {
+	forward_auth authelia:9091 {
+		uri /api/authz/forward-auth
+		copy_headers Remote-User Remote-Groups Remote-Email Remote-Name
+	}
+}
+
+### Basic Authentik snippet for Reverse Proxy Providers
+(authentik) {
+	#directive execution order is only as stated if enclosed with route.
+	route {
+		# always forward outpost path to actual outpost
+		reverse_proxy /outpost.goauthentik.io/* http://authentik-server:9000
+
+		# forward authentication to outpost
+		forward_auth http://authentik-server:9000 {
+			uri /outpost.goauthentik.io/auth/caddy
+
+			# capitalization of the headers is important, otherwise they will be empty
+			copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
+
+			# optional, in this config trust all private ranges, should probably be set to the outposts IP
+			trusted_proxies private_ranges
+		}
+
+		# actual site configuration below, for example
+		reverse_proxy {args[0]}
+	}
+}
+
+### Authentik snippet for Reverse Proxy Providers WITH "authorization" header. For BasicAuth
+(authentik_auth) {
+	#directive execution order is only as stated if enclosed with route.
+	route {
+		# always forward outpost path to actual outpost
+		reverse_proxy /outpost.goauthentik.io/* http://authentik-server:9000
+
+		# forward authentication to outpost
+		forward_auth http://authentik-server:9000 {
+			uri /outpost.goauthentik.io/auth/caddy
+
+			# capitalization of the headers is important, otherwise they will be empty
+			copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version authorization
+
+			# optional, in this config trust all private ranges, should probably be set to the outposts IP
+			trusted_proxies private_ranges
+		}
+
+		# actual site configuration below, for example
+		reverse_proxy {args[0]}
+	}
+}
+
+### Snippet to FULLY BYPASS Authentik for local and other fixed IP addresses
+(direct_local_ext_auth) {
+	@internal {
+		remote_ip 192.168.0.0/16 172.20.0.0/24 10.0.0.0/8 127.0.0.1/8
+	}
+
+	handle @internal {
+		reverse_proxy {args[0]}
+	}
+
+	handle {
+		import authentik {args[0]}
+	}
+}
+
+### Snippet to FULLY BYPASS Authentik for local and other fixed IP addresses, WITH "authorization" header. For BasicAuth
+(direct_local_ext_auth_basic) {
+	@internal {
+		remote_ip 192.168.0.0/16 172.20.0.0/24 10.0.0.0/8 127.0.0.1/8
+	}
+
+	handle @internal {
+		reverse_proxy {args[0]}
+	}
+
+	handle {
+		import authentik_auth {args[0]}
+	}
+}

@@ -1,0 +1,22 @@
+services:
+  npmgraf:
+    image: smilebasti/npmgrafstats
+    container_name: npmgraf
+    environment:
+      - INFLUX_HOST=${INFLUX_HOST}
+      - INFLUX_BUCKET=${INFLUX_BUCKET}
+      - INFLUX_ORG=${INFLUX_ORG}
+      - INFLUX_TOKEN=${INFLUX_TOKEN}
+      - REDIRECTION_LOGS=TRUE # set to TRUE or FALSE or ONLY
+      - INTERNAL_LOGS=FALSE # set to TRUE or FALSE or ONLY # IMPORTANT see below for more info about this feature
+      - MONITORING_LOGS=FALSE # set to TRUE or FALSE or ONLY # IMPORTANT see below for more info about this feature
+    volumes:
+      - {PATH_TO_NGINX_PROXY_MANAGER_LOGS}/logs:/logs:ro
+      - {PATH_TO_GEOLITE_DATA}/GeoLiteData:/geolite:ro
+      #- /home/docker/monitoringips.txt:/monitoringips.txt # optional only mount if preexists and a wanted feature
+    restart: unless-stopped
+     
+networks:
+  default:
+    name: ${NETWORK}
+    external: true

@@ -1,0 +1,28 @@
+---
+
+services:
+  caddy:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: caddy
+    restart: unless-stopped
+    user: 1008:1008
+    ports:
+      #- "80:80"
+      - "443:443"
+      - "443:443/udp"
+      - "2019:2019"
+    volumes:
+      - ./caddy/config:/etc/caddy
+      - ./caddy/data:/data
+      - ./caddy/logs:/var/log/caddy/
+    environment:
+      - CF_API_TOKEN=${CF_API_TOKEN}
+      - EMAIL=${EMAIL}
+      - MY_DOMAIN=${DOMAIN}
+      - TZ=${MY_TZ}
+networks:
+  default:
+    name: ${NETWORK}
+    external: true

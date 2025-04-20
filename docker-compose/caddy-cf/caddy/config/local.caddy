@@ -1,0 +1,91 @@
+#####################################################################################################
+############################################## LOCAL ONLY ###########################################
+#####################################################################################################
+
+############################################ OMV #############################################
+@omv host omv.{env.MY_DOMAIN}
+handle @omv {
+	import local_only
+	reverse_proxy http://192.168.0.30:83
+}
+
+############################################ OPENWRT ROUTER #############################################
+@wrt host wrt.{env.MY_DOMAIN}
+handle @wrt {
+	import local_only
+	reverse_proxy http://192.168.0.1:801
+}
+
+############################################ URBackup #############################################
+@urbackup host urbackup.{env.MY_DOMAIN}
+handle @urbackup {
+	import local_only
+	reverse_proxy http://192.168.0.30:55414
+}
+
+############################################ Adguard (NAS) #############################################
+@adguard host adguard.{env.MY_DOMAIN}
+handle @adguard {
+	import local_only
+	reverse_proxy http://192.168.0.246:8180
+}
+
+############################################ Jackett (video stack) #############################################
+@jackett host jackett.{env.MY_DOMAIN}
+handle @jackett {
+	import local_only
+	reverse_proxy http://jackett:9117
+}
+
+############################################ Qbit (video stack) #############################################
+@qbit host qbit.{env.MY_DOMAIN}
+handle @qbit {
+	import local_only
+	reverse_proxy http://qbittorrent:8080
+}
+
+############################################ ESP home #############################################
+@esp host esp.{env.MY_DOMAIN}
+handle @esp {
+	import local_only
+	reverse_proxy http://192.168.0.246:6052 ## your actual ESP ip
+}
+
+############################################ Z2M #############################################
+@z2m host z2m.{env.MY_DOMAIN}
+handle @z2m {
+	import local_only
+	reverse_proxy http://192.168.0.246:8080 ## your actual Z2M ip
+}
+
+############################################ Prometheus #############################################
+@prometheus host prometheus.{env.MY_DOMAIN}
+handle @prometheus {
+	import local_only
+	reverse_proxy http://prometheus:9090
+}
+
+############################################ Cardvisor #############################################
+@cadvisor host cadvisor.{env.MY_DOMAIN}
+handle @cadvisor {
+	import local_only
+	reverse_proxy http://cadvisor:8080
+}
+
+############################################ LLDAP #############################################
+@ldap host ldap.{env.MY_DOMAIN}
+handle @ldap {
+	import local_only
+	reverse_proxy http://lldap:17170
+}
+
+############################################ Proxmox #############################################
+@proxmox1 host proxmox1.{env.MY_DOMAIN}
+handle @proxmox1 {
+	import local_only
+	reverse_proxy 192.168.0.157:8006 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}

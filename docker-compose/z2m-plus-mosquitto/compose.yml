@@ -1,0 +1,34 @@
+services:
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    image: koenkk/zigbee2mqtt:latest-dev
+    restart: unless-stopped
+    devices: 
+    #  - /dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_V2_.......:/dev/ttyACM0      ## Device path Must be corrected to real one
+    user: ${MY_UID}:${MY_GUID}
+    group_add:
+      - dialout
+    ports: 
+      - 8080:8080
+    volumes:
+      - ./z2m/data:/app/data
+      - /run/udev:/run/udev:ro
+    environment:
+      - TZ=${MY_TZ}
+    
+  mqtt5:
+    image: eclipse-mosquitto
+    container_name: mqtt5
+    user: ${MY_UID}:${MY_GUID}
+    restart: unless-stopped
+    ports:
+      - "11883:1883" #default mqtt port
+      - "19001:9001" #default mqtt port for websockets
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+networks:
+  default:
+    name: ${MY_NET}
+    external: true

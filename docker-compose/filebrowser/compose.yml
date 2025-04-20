@@ -1,0 +1,20 @@
+services:
+  filebrowser:
+    image: hurlenko/filebrowser
+    container_name: filebrowser
+    restart: unless-stopped
+    user: ${MY_UID}:${MY_GUID}
+    ports:
+      - 8080:8080
+    networks:
+      net:
+        aliases: []
+    volumes:
+      - ./data:/data
+      - ./config:/config
+    environment:
+      TZ: ${MY_TZ}
+networks:
+  net:
+    external: true
+    name: ${NETWORK}

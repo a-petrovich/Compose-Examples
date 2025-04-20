@@ -1,0 +1,164 @@
+#####################################################################################################
+#########################################  EXTERNAL ACCESS  #########################################
+#####################################################################################################
+
+############################################ Authelia #############################################
+#@auth host auth.{env.MY_DOMAIN}
+#handle @auth {
+#	import security
+#	reverse_proxy authelia:9091
+#}
+
+############################################ Authentik #############################################
+@flexauth host flexauth.{env.MY_DOMAIN}
+handle @flexauth {
+	import security
+
+	#@auth_api path /api/v3/policies/expression* /api/v3/propertymappings* /api/v3/managed/blueprints*
+
+	#route @auth_api {
+	#	respond 403
+	#}
+
+	reverse_proxy http://authentik-server:9000
+}
+
+############################################ Heimdall Start Page #############################################
+@start host start.{env.MY_DOMAIN}
+handle @start {
+	import security
+	import direct_local_ext_auth http://homepage:3000
+}
+
+############################################ OMV #############################################
+@klipper host klipper.{env.MY_DOMAIN}
+handle @klipper {
+	import security
+	import direct_local_ext_auth http://http://192.168.0.91 ## your actual klipper ip
+}
+
+############################################ Nextcloud #############################################
+@nextcloud host nextcloud.{env.MY_DOMAIN}
+handle @nextcloud {
+	import security
+
+	redir /.well-known/carddav /remote.php/dav/ 301
+	redir /.well-known/caldav /remote.php/dav/ 301
+
+	handle_path /whiteboard/* {
+		reverse_proxy http://nextcloud-whiteboard-server:3002
+	}
+
+	#route
+	handle_path /standalone-signaling/* {
+		uri strip_prefix /standalone-signaling
+		reverse_proxy http://nextcloud-hpb:8081 {
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
+	reverse_proxy http://nextcloud:80
+}
+
+############################################ Collabora #############################################
+@collabora host collabora.{env.MY_DOMAIN}
+handle @collabora {
+	import security
+	reverse_proxy http://collabora:9980
+}
+
+############################################ ntfy #############################################
+@ntfy host ntfy.{env.MY_DOMAIN}
+handle @ntfy {
+	import security
+	reverse_proxy http://ntfy:80
+}
+
+############################################ Navidrome music #############################################
+@music host music.{env.MY_DOMAIN}
+handle @music {
+	import security
+	reverse_proxy http://navidrome:4533
+}
+
+############################################ Jellyfin #############################################
+@jelly host jelly.{env.MY_DOMAIN}
+handle @jelly {
+	import security
+	import direct_local_ext_auth http://jellyfin:8096
+}
+
+################################################## VIDEO ORGANAIZER STACK  ######################################
+
+############################################ Sonarr #############################################
+@sonarr host sonarr.{env.MY_DOMAIN}
+handle @sonarr {
+	import security
+	import direct_local_ext_auth_basic http://sonarr:8989
+}
+
+############################################ Radarr #############################################
+@radarr host radarr.{env.MY_DOMAIN}
+handle @radarr {
+	import security
+	import direct_local_ext_auth_basic http://radarr:7878
+}
+
+############################################ Lidarr #############################################
+@lidarr host lidarr.{env.MY_DOMAIN}
+handle @lidarr {
+	import security
+	import direct_local_ext_auth_basic http://lidarr:8686
+}
+
+#################################################################################################################
+
+############################################ Mealie Food #############################################
+@food host food.{env.MY_DOMAIN}
+handle @food {
+	import security
+	reverse_proxy http://mealie:9000
+}
+
+############################################ Home Assistant #############################################
+@automation host automation.{env.MY_DOMAIN}
+handle @automation {
+	import security
+	reverse_proxy http://192.168.0.246:8123 ## your actual HA ip
+}
+
+############################################ Vaultwarden #############################################
+@vault host vault.{env.MY_DOMAIN}
+handle @vault {
+	import security
+	encode gzip
+
+	@admin {
+		path /admin*
+		not remote_ip private_ranges
+	}
+	redir @admin /
+
+	reverse_proxy http://vaultwarden:80
+}
+
+############################################ Bookstack #############################################
+@bookstack host bookstack.{env.MY_DOMAIN}
+handle @bookstack {
+	import security
+	reverse_proxy http://bookstack:80
+}
+
+############################################ Immich #############################################
+@immich host immich.{env.MY_DOMAIN}
+handle @immich {
+	import security
+	reverse_proxy http://immich_server:2283
+}
+
+############################################ Grafana #############################################
+@grafana host grafana.{env.MY_DOMAIN}
+handle @grafana {
+	import security
+	import direct_local_ext_auth http://grafana:3000
+}
