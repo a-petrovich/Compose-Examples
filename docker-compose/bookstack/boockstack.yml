@@ -1,0 +1,26 @@
+---
+
+services:
+  bookstack:
+    image: lscr.io/linuxserver/bookstack
+    container_name: bookstack
+    volumes:
+      - ./bookstack:/config
+    #ports:
+    #  - 5648:80
+    environment:
+      - PUID=${BOOKS_UID}
+      - PGID=${BOOKS_UID}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_HOST=${MARIA_DB_HOST}
+      - DB_PORT=${MARIA_DB_PORT}
+      - APP_URL=${APP_URL}
+      - TZ=${MY_TZ}
+    restart: unless-stopped
+    
+networks:
+  default:
+    name: ${NETWORK}
+    external: true
