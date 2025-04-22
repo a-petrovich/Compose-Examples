@@ -14,7 +14,8 @@ services:
       - "443:443/udp"
       - "2019:2019"
     volumes:
-      - ./caddy/config:/etc/caddy
+      - ./caddy/conf:/etc/caddy
+      - ./caddy/config:/config
       - ./caddy/data:/data
       - ./caddy/logs:/var/log/caddy/
     environment:
